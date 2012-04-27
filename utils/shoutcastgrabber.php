@@ -3,11 +3,7 @@
 <?php
   error_reporting(E_ERROR);  
   require('../libs/spider.libc.php');
-  $mysqli = new mysqli("localhost", "root", "", "bassdrive");
-  
-  if ($mysqli->connect_errno) {
-	die( "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error );
-  }
+  require('../config.php');
    
   $data = Array();  
   $spider = new spider();

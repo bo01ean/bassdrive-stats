@@ -7,7 +7,8 @@ header('Content-type: application/json');
 
   error_reporting('E_NONE');  
 
-  $mysqli = new mysqli("localhost", "root", "", "bassdrive");
+  require("../config.php");  
+  
   
   if ($mysqli->connect_errno) {
 	die( "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error );
