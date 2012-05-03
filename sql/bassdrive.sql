@@ -7,7 +7,6 @@
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
-create database bassdrive;
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
