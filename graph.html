@@ -138,10 +138,10 @@ function buildGraph( json )
 		barGraph.add(title);
 	}
 	  
-	var heading = alignPlane( createText2D( "Bassdrive Stats For Week 17", "purple", "Georgia", 25, 25, 25), THREE.CenterAlign, THREE.CenterAlign);  
+	var heading = alignPlane( createText2D( "Bassdrive Stats", "purple", "Georgia", 25, 25, 25), THREE.CenterAlign, THREE.CenterAlign);  
 		heading.position.y = -25;
 		heading.position.z = 40;
-		barGraph.add(heading);
+		barGraph.add(heading); 
 	  
 	  
 	for (var j=0; j<grid[0].length; j++) {
