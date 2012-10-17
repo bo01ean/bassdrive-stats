@@ -7,8 +7,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script src="http://code.jquery.com/ui/1.8.2/jquery-ui.js"></script>
     <script src="js/Three.js"></script>    
-    <script src="js/datGui.js"></script>    
-    <script src="js/tween.js"></script>    
     <script src="js/raf.js"></script>	
 	<style type="text/css">
       body {
@@ -28,6 +26,7 @@
     </style>
   </head>
   <body>
+	 <!-- let's parse audio data to animate graph later ...
 	<!--audio controls src="http://czech1.serverhostingcenter.streams.bassdrive.com:8200/;"></audio-->
 	  <script>
       // <!--	  
@@ -48,10 +47,7 @@
 	var meshes = [];
 	var meshInc = 0;	
 	var gui = {};
-	
-
-	//var gui = new DAT.GUI({ height	: 4 * 32 - 1 });	
-	
+		
 	var userOpts	= {
 		range		: 800,
 		duration	: 2500,
@@ -59,79 +55,7 @@
 		easing		: 'Elastic.EaseInOut',
 		theta		: 0
 	};
-	
-	
-	// build the GUI 
-	buildGui(userOpts, function(){
-		console.log( "userOpts", userOpts )
-		//setupTween();
-		render();
-	});
-	
 
-	function setupTween()
-	{
-		// 
-		var update	= function(){
-			cube.position.x = current.x;
-		}
-		var current	= { x: -userOpts.range };
-
-		// remove previous tweens if needed
-		TWEEN.removeAll();
-		
-		// convert the string from dat-gui into tween.js functions 
-		var easing	= TWEEN.Easing[userOpts.easing.split('.')[0]][userOpts.easing.split('.')[1]];
-		// build the tween to go ahead
-		var tweenHead	= new TWEEN.Tween(current)
-			.to({x: +userOpts.range}, userOpts.duration)
-			.delay(userOpts.delay)
-			.easing(easing)
-			.onUpdate(update);
-		// build the tween to go backward
-		var tweenBack	= new TWEEN.Tween(current)
-			.to({x: -userOpts.range}, userOpts.duration)
-			.delay(userOpts.delay)
-			.easing(easing)
-			.onUpdate(update);
-
-		// after tweenHead do tweenBack
-		tweenHead.chain(tweenBack);
-		// after tweenBack do tweenHead, so it is cycling
-		tweenBack.chain(tweenHead);
-
-		// start the first
-		tweenHead.start();
-	}
-
-	
-
-// # Build gui with dat.gui
-function buildGui(options, callback)
-{
-	// collect all available easing in TWEEN library
-	var easings	= {};
-	Object.keys(TWEEN.Easing).forEach(function(family){
-		Object.keys(TWEEN.Easing[family]).forEach(function(direction){
-			var name	= family+'.'+direction;
-			easings[name]	= name;
-		});
-	});
-	// the callback notified on UI change
-	var change	= function(){
-		callback(options)
-	}
-	// create and initialize the UI
-	var gui = new DAT.GUI({ height	: 4 * 32 - 1 });
-	gui.add(options, 'theta').name('Theta').min(0).max(1)	.onChange(change);
-	gui.add(options, 'duration').name('Duration (ms)').min(100).max(4000)	.onChange(change);
-	gui.add(options, 'delay').name('Delay (ms)').min(0).max(1000)		.onChange(change);
-	gui.add(options, 'easing').name('Easing Curve').options(easings)	.onChange(change);
-}
-	
-	
-	
-	
 	  
       renderer.setClearColorHex(0xEEEEEE, 1.0);
       renderer.shadowMapEnabled = true;
@@ -177,6 +101,9 @@ function buildGui(options, callback)
 	  // make JSON call to data script
 		$.getJSON("getData.php?week=" + getWeek,
 			function(data){
+			  if( data == null ){
+			    data = {"Sun 08\/26\/12":{"00":532.58333333333,"01":645.83333333333,"02":697.83333333333,"03":746.33333333333,"04":791.08333333333,"05":831,"06":864.25,"07":894,"08":921.58333333333,"09":962.91666666667,"10":964.58333333333,"11":939.25,"12":968.41666666667,"13":888.08333333333,"14":788.25,"15":658,"16":575.5,"17":535.08333333333,"18":471.83333333333,"19":429.58333333333,"20":421.33333333333,"21":442.25,"22":456.5,"23":525.41666666667},"Mon 08\/27\/12":{"00":625.58333333333,"01":701.5,"02":766.08333333333,"03":825.16666666667,"04":929.58333333333,"05":960.75,"06":1044,"07":1078.8333333333,"08":1111.0833333333,"09":1055.5,"10":1090.1666666667,"11":1109.3333333333,"12":1036.75,"13":943.5,"14":832.41666666667,"15":734.91666666667,"16":624.08333333333,"17":547.25,"18":515.83333333333,"19":501.5,"20":489.91666666667,"21":485.75,"22":490.66666666667,"23":550.5},"Tue 08\/28\/12":{"00":616.75,"01":768.75,"02":871.41666666667,"03":924.33333333333,"04":917.66666666667,"05":953.75,"06":1046,"07":1117.8333333333,"08":1202.0833333333,"09":1221.5833333333,"10":1230.4166666667,"11":1182.6666666667,"12":1145.75,"13":959.66666666667,"14":804.25,"15":723,"16":670.41666666667,"17":579.91666666667,"18":503.75,"19":461.33333333333,"20":452.33333333333,"21":446.16666666667,"22":478.08333333333,"23":539.91666666667},"Wed 08\/29\/12":{"00":627.33333333333,"01":749.75,"02":882.83333333333,"03":942.83333333333,"04":1010.5,"05":1031.4166666667,"06":1166.9166666667,"07":1183.1666666667,"08":1211.6666666667,"09":1197.0833333333,"10":1219.9166666667,"11":1181.1666666667,"12":1210.3333333333,"13":1103.6666666667,"14":945.25,"15":835.66666666667,"16":724.16666666667,"17":646,"18":594.33333333333,"19":549.91666666667,"20":499.41666666667,"21":489.41666666667,"22":499.66666666667,"23":533.58333333333},"Thu 08\/30\/12":{"00":635.25,"01":763,"02":860,"03":969.66666666667,"04":1030,"05":1071.0833333333,"06":1046,"07":1098.0833333333,"08":1171.8333333333,"09":1171.0833333333,"10":1178.8333333333,"11":1199.6666666667,"12":1172.0833333333,"13":1111,"14":972.75,"15":812.66666666667,"16":682.08333333333,"17":624.58333333333,"18":544.25,"19":497.41666666667,"20":472,"21":472.83333333333,"22":490.25,"23":579.91666666667},"Fri 08\/31\/12":{"00":651,"01":823.91666666667,"02":963.66666666667,"03":995.5,"04":1055.8333333333,"05":1119.3333333333,"06":1195.25,"07":1108,"08":1111.9166666667,"09":1095.1666666667,"10":1090.5,"11":1023.9166666667,"12":1003.4166666667,"13":943.16666666667,"14":867.16666666667,"15":777.75,"16":664.5,"17":582.58333333333,"18":507.83333333333,"19":413,"20":356.66666666667,"21":456,"22":465.83333333333,"23":502.75},"Sat 09\/1\/12":{"00":584.5,"01":673.5,"02":732.91666666667,"03":758.58333333333,"04":823,"05":881.58333333333,"06":920.08333333333,"07":936.41666666667,"08":922.58333333333,"09":898.25,"10":958.16666666667,"11":970.83333333333,"12":923.16666666667,"13":826.91666666667,"14":723.25,"15":647.75,"16":587,"17":541.33333333333,"18":494.41666666667,"19":447.66666666667,"20":419.08333333333,"21":404.66666666667,"22":405.75,"23":447.58333333333}}
+			  }
 			  buildGraph( data );
 		});	  
 	  
@@ -235,6 +162,9 @@ function buildGui(options, callback)
 	
 	
 	
+	
+	
+
 	
 	
 function buildGraph( json )
@@ -356,7 +286,7 @@ function buildGraph( json )
 }
 
 
-
+// add member function will not work, must use shader.
 THREE.Mesh.prototype.grow = function()
 {
 
