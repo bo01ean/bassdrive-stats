@@ -29,6 +29,43 @@
 	 <!-- let's parse audio data to animate graph later ...
 	<!--audio controls src="http://czech1.serverhostingcenter.streams.bassdrive.com:8200/;"></audio-->
 	  <script>
+
+/**
+ * Returns the week number for this date.  dowOffset is the day of week the week
+ * "starts" on for your locale - it can be from 0 to 6. If dowOffset is 1 (Monday),
+ * the week returned is the ISO 8601 week number.
+ * @param int dowOffset
+ * @return int
+ */
+Date.prototype.getWeek = function (dowOffset) {
+/*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
+
+    dowOffset = typeof(dowOffset) == 'int' ? dowOffset : 0; //default dowOffset to zero
+    var newYear = new Date(this.getFullYear(),0,1);
+    var day = newYear.getDay() - dowOffset; //the day of week the year begins on
+    day = (day >= 0 ? day : day + 7);
+    var daynum = Math.floor((this.getTime() - newYear.getTime() - 
+    (this.getTimezoneOffset()-newYear.getTimezoneOffset())*60000)/86400000) + 1;
+    var weeknum;
+    //if the year starts before the middle of a week
+    if(day < 4) {
+        weeknum = Math.floor((daynum+day-1)/7) + 1;
+        if(weeknum > 52) {
+            nYear = new Date(this.getFullYear() + 1,0,1);
+            nday = nYear.getDay() - dowOffset;
+            nday = nday >= 0 ? nday : nday + 7;
+            /*if the next year starts before the middle of
+              the week, it is week #1 of that year*/
+            weeknum = nday < 4 ? 1 : 53;
+        }
+    }
+    else {
+        weeknum = Math.floor((daynum+day-1)/7);
+    }
+    return weeknum - 1;
+};
+
+
       // <!--	  
       THREE.LeftAlign = 1;
       THREE.CenterAlign = 0;
@@ -91,22 +128,31 @@
 	  var barSize = 10;
 	  var spacing = 1;
 	
-	  
+
+
+
+	  var today = new Date();
+	  var year = today.getFullYear();
 	  var getWeek = getParameterByName('week');
-	  
-	  if( getWeek==undefined ){
-		getWeek = 39;
+
+
+	  if (getWeek == null){
+		getWeek = today.getWeek();
+		console.log('getWeek:' + getWeek);
 	  }
 	  
     var barGraph = new THREE.Object3D();
     scene.add(barGraph);	  
 	  
 	  // make JSON call to data script
-		$.getJSON("getData.php?week=" + getWeek,
-			function(data){
+		url = "getData.php?week=" + getWeek + "&year=" + year;
+		console.log(url);
+		$.getJSON(url, function(data){
 			  buildGraph( data );
-		})
-		.error( buildGraph( null ) );	  
+		}).error(function(){
+			console.log('hi!!');
+			buildGraph( null );
+		} );	  
 	  
 
 	
@@ -130,46 +176,12 @@
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	
 	
 function buildGraph( json )
 {
-	
+	console.log(json);
+
       var grid = [];
       var week = [];
 	  var y = 0;
@@ -470,7 +482,9 @@ THREE.Mesh.prototype.grow = function()
 		return str;
 	}
 	
-	
+
+
+
 	// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values  
 	function getParameterByName(name)
 	{
@@ -479,7 +493,7 @@ THREE.Mesh.prototype.grow = function()
 	  var regex = new RegExp(regexS);
 	  var results = regex.exec(window.location.search);
 	  if(results == null)
-		return "";
+		return null;
 	  else
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 	}

@@ -1,6 +1,7 @@
 <html><head></head>
 <body>
 <?php
+
   error_reporting(E_ERROR);  
   require('config.php');
   require('libs/spider.libc.php');

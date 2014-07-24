@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 ## spider.libb.php - a http sockets spider class by Nathan Trujillo ##
 ## Copyright 2003. Usage of this software is prohibited without     ##
@@ -485,7 +485,7 @@ class spider
 		         if(($this->length > 0)&&($this->length > $this->sizelimit)){
 			      while($new = fread($this->sFp,$this->length)){
                     fwrite($newptr,$new);
-                    $this->output_graph(& $this->length , ftell($newptr) , $file) ;
+                    $this->output_graph($this->length , ftell($newptr) , $file) ;
                   }
 
 			 }else{

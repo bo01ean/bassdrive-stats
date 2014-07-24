@@ -1,8 +1,6 @@
 <?php
 
-  //chdir("/usr/home/intuit/bassdrive-stats/");
-
-  $mysqli = new mysqli("localhost", "root", "", "bassdrive");
+  $mysqli = new mysqli("localhost", "", "", "bassdrive");
   
   if ($mysqli->connect_errno)
   {

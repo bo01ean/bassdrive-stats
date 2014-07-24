@@ -1,11 +1,10 @@
 <?php
 
-//http://snippets.dzone.com/posts/show/5882
 header('Cache-Control: no-cache, must-revalidate');
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 header('Content-type: application/json');
 
-  error_reporting('E_NONE');  
+error_reporting('E_ALL');  
 
   include("config.php");
   
@@ -13,9 +12,15 @@ header('Content-type: application/json');
 	die( "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error );
   }
 
-  $dateStr = ( isset($_GET['week']) ) ? "		DATE_FORMAT( `pulls`.`creationTime`, '%U' ) ='" . $_GET['week'] . "'
-		  AND" : "";
+
+  $dateStr = ( isset($_GET['week']) ) 
+  		? "\t\t\tAND		DATE_FORMAT( `pulls`.`creationTime`, '%U' ) ='" . intval($_GET['week']) . "'" 
+		 : "";
   
+  $dateStr .= ( isset($_GET['year']) ) 
+  		? "\t\t\tAND		DATE_FORMAT( `pulls`.`creationTime`, '%Y' ) ='" . intval($_GET['year']) . "'" 
+		 : "";
+
   $sql = "
 	SELECT
 	#`shows`.`name` ,
@@ -24,20 +29,20 @@ header('Content-type: application/json');
 	DATE_FORMAT( `pulls`.`creationTime`, '%U' ) AS week,
 	DATE_FORMAT( `pulls`.`creationTime`, '%H' ) AS hour,
 	DATE_FORMAT( `pulls`.`creationTime`, '%a' ) AS dow,
+	DATE_FORMAT( `pulls`.`creationTime`, '%Y' ) AS year,
 	DATE_FORMAT( `pulls`.`creationTime`, '%a %m/%e/%y' ) AS stamp,
 	`pulls`.`creationTime` as pullTime,
 	`pulls`.`id` as id
 	
 	  FROM `stats` , `pulls` , `shows`
 	    WHERE
-		  $dateStr
 		  `stats`.`pullId` = `pulls`.`id`
+		  {$dateStr}
+
 	      AND `stats`.`showId` = `shows`.`id`
 	    GROUP BY 
 	    `pulls`.`id`, `hour`
 	      ORDER BY pullTime ASC
-	     # LIMIT 4608
-	  
   ";
   
   $totals = Array();
@@ -49,6 +54,5 @@ header('Content-type: application/json');
 	}
 
 	print json_encode( $totals );
-	
-} 	
+	 	
 ?>
