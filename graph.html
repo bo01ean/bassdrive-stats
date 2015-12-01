@@ -3,7 +3,7 @@
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script src="http://code.jquery.com/ui/1.8.2/jquery-ui.js"></script>
-    <script src="js/Three.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.js"></script>    
     <script src="js/raf.js"></script>	
 	<style type="text/css">
       body {
@@ -27,6 +27,18 @@
 	<!--audio controls src="http://czech1.serverhostingcenter.streams.bassdrive.com:8200/;"></audio-->
 	  <script>
 
+
+/*
+THREE.Mesh.prototype.grow = function()
+{	
+		if( this.scale.y == 1)
+		{
+			clearInterval( this.tag )
+			return;				
+		}
+
+	this.scale.y += .01;	
+}*/
 /**
  * Returns the week number for this date.  dowOffset is the day of week the week
  * "starts" on for your locale - it can be from 0 to 6. If dowOffset is 1 (Monday),
@@ -91,7 +103,7 @@ Date.prototype.getWeek = function (dowOffset) {
 	};
 
 	  
-      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      //renderer.setClearColorHex(0xEEEEEE, 1.0);
       renderer.shadowMapEnabled = true;
       renderer.shadowMapWidth = 1024;
       renderer.shadowMapHeight = 1024;
@@ -124,9 +136,6 @@ Date.prototype.getWeek = function (dowOffset) {
       
 	  var barSize = 10;
 	  var spacing = 1;
-	
-
-
 
 	  var today = new Date();
 	  var year = today.getFullYear();
@@ -135,7 +144,7 @@ Date.prototype.getWeek = function (dowOffset) {
 
 	  if (getWeek == null){
 		getWeek = today.getWeek();
-		console.log('getWeek:' + getWeek);
+		console.log('getWeek undefined, defaulting to today\'s week ' + getWeek);
 	  }
 	  
     var barGraph = new THREE.Object3D();
@@ -147,34 +156,10 @@ Date.prototype.getWeek = function (dowOffset) {
 		$.getJSON(url, function(data){
 			  buildGraph( data );
 		}).error(function(){
-			console.log('hi!!');
+			console.log('Using default dataset since datasource failed');
 			buildGraph( null );
 		} );	  
-	  
-
-	
-
-	  
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		
 function buildGraph( json )
 {
 	console.log(json);
@@ -240,7 +225,7 @@ function buildGraph( json )
 		barGraph.add( title );
 	}
 	  
-	var heading = alignPlane( createText2D( "Bassdrive Stats for week: " + getWeek, "purple", "Georgia", 25, 25, 25), THREE.CenterAlign, THREE.CenterAlign);  
+	var heading = alignPlane( createText2D( "Listener Stats for week: " + getWeek, "purple", "Georgia", 25, 25, 25), THREE.CenterAlign, THREE.CenterAlign);  
 		heading.position.y = -25;
 		heading.position.x = -30;
 		heading.position.z = 40;
@@ -259,38 +244,31 @@ function buildGraph( json )
 		barGraph.add(title);		
 	}
 
-	
-
-	
 	for (var j=0; j<grid.length; j++)
 	{// bars
 		var array = grid[j];
 		for (var i=0; i<array.length; i++) {
-		  var mat = new THREE.MeshLambertMaterial({color: 0xFFAA55, opacity: .89 });
+		  
+		  var mat = new THREE.MeshLambertMaterial({color: 0xFFAA55 });
 		  var barHeight = array[i]/max * 80;
-		  mat.color.setHSV(0.2 + 0.8*array[i]/max, 0.8, 1);
+
+		  var hColor = 0.2 + 0.8 * array[i]/max;
+		  console.log("setHSL: ", hColor);
+		  mat.color.setHSL(hColor, 0.8, 1);
 		  var geo = new THREE.CubeGeometry( barSize - spacing, barHeight, barSize - spacing );
 		  var mesh = new THREE.Mesh(geo, mat);
-		 
-		  
-		  
-		  //mesh.grow();// grow a certain percentage		  
+		 	  
 		  mesh.position.x = (i-(array.length-1)/2) * barSize;
 		  mesh.position.y = barHeight/2;
 		  mesh.position.z = -(j-(grid.length-1)/2) * barSize;
 
 		  
 		  meshes[meshInc] = mesh;
-		  
 		  mesh.castShadow = mesh.receiveShadow = true;
-		  barGraph.add( mesh );
-		  
-		  
-		  
+		  barGraph.add( meshes[meshInc] );
 		  mesh.scale.y = 1;		  
 		  //meshes[meshInc].tag = setInterval( function( meshInc ){ meshes[meshInc].grow();}, 30 ); 
 
-		  
 		  meshInc++;
 		  
 		  
@@ -299,41 +277,19 @@ function buildGraph( json )
 }
 
 
-// add member function will not work, must use shader.
-THREE.Mesh.prototype.grow = function()
-{
-
-	
-		if( this.scale.y == 1)
-		{
-			clearInterval( this.tag )
-			return;				
-		}
-
-	this.scale.y += .01;
-			
-	
-}
 		  
-		  
-
-
-
-
-
-
       renderer.render(scene, camera);
+
       var paused = false;
       var last = new Date().getTime();
       var down = false;
       var sx = 0, sy = 0;
       var rot = Math.PI/3;
 	  
-	  var coef = 300;//140
+	  var coef = 140;
 	  
-	  
-      camera.position.x = Math.cos(rot)*coef;
-      camera.position.z = Math.sin(rot)*coef;
+      //camera.position.x = Math.cos(rot)*coef;
+      //camera.position.z = Math.sin(rot)*coef;
       
 	  
 	  
@@ -341,14 +297,18 @@ THREE.Mesh.prototype.grow = function()
         down = true;
         sx = ev.clientX;
         sy = ev.clientY;
+        console.log(sx, sy);
       };
-
-      window.onmouseup = function(ev){
-      	down = false;
+	  
+	  
+	  
+      window.onmouseup = function(ev){ 
+      	down = false; 
       	sx = ev.clientX;
       	sy = ev.clientY;
       };
-
+      
+	  
 	  window.onmousemove = function(ev) {
         if (down) {
           var dx = ev.clientX - sx;
@@ -361,11 +321,47 @@ THREE.Mesh.prototype.grow = function()
           sy += dy;
         }
       }
+	  
+	function animate(t) {
+		if (!paused) {
+		  last = t;
+		  renderer.clear();
+		  camera.lookAt(scene.position);
+		  renderer.render(scene, camera);
+		}
 
-	  
-	  
-	  
-	  
+		window.requestAnimationFrame(animate, renderer.domElement);
+
+		if(!down) {
+			moveCamera();
+		} else {
+			//theta = 0;
+		}
+	};
+
+    animate(new Date().getTime());
+
+	onmessage = function(ev) {
+		paused = (ev.data == 'pause');
+	};
+	
+	function moveCamera()
+	{
+		userOpts.theta.x += .5;
+		userOpts.theta.y += .5;
+		userOpts.theta.z += .5;
+		adjustCamForUser(userOpts.theta);
+		camera.lookAt( scene.position );
+		renderer.render( scene, camera );
+	}
+
+	function adjustCamForUser(obj)
+	{
+		camera.position.x = radius * Math.sin( obj.x * Math.PI / 360 );
+		camera.position.y = radius * Math.sin( obj.y * Math.PI / 360 );
+		camera.position.z = radius * Math.cos( obj.z * Math.PI / 360 );
+
+	}	  
 	  
 	  
 	  
@@ -409,68 +405,32 @@ THREE.Mesh.prototype.grow = function()
         return canvas;
       }
 
-      function createText2D(text, color, font, size, segW, segH) {
-        var canvas = createTextCanvas(text, color, font, size);
-        var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
-        var tex = new THREE.Texture(canvas);
-        tex.needsUpdate = true;
-        var planeMat = new THREE.MeshBasicMaterial({
-          map:tex, color: 0xffffff, transparent:true
-        });
-        var mesh = new THREE.Mesh(plane, planeMat);
-        mesh.doubleSided = true;
-        return mesh;
-      }
+	function createText2D(text, color, font, size, segW, segH) {
+		var canvas = createTextCanvas(text, color, font, size);
+		var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
+		var tex = new THREE.Texture(canvas);
+		tex.needsUpdate = true;
+		var planeMat = new THREE.MeshBasicMaterial({
+			map:tex, color: 0xffffff, transparent:true
+		});
+		var mesh = new THREE.Mesh(plane, planeMat);
+		mesh.doubleSided = true;
+		return mesh;
+	}
 
 
-      function alignPlane(plane, horizontalAlign, verticalAlign) {
-        var obj = new THREE.Object3D();
-        var u = plane.geometry.vertices[0].position;
-        var v = plane.geometry.vertices[plane.geometry.vertices.length-1].position;
-        var width = Math.abs(u.x - v.x);
-        var height = Math.abs(u.y - v.y);
-        plane.position.x = (width/2) * horizontalAlign;
-        plane.position.y = (height/2) * verticalAlign;
-        obj.add(plane);
-        return obj;
-      }
+	function alignPlane(plane, horizontalAlign, verticalAlign) {
+		var obj = new THREE.Object3D();
+		//var u = plane.geometry.vertices[0].position;
+		//var v = plane.geometry.vertices[plane.geometry.vertices.length-1].position;
 
-
-	  
-      function animate(t) {
-        if (!paused) {
-          last = t;
-          renderer.clear();
-          camera.lookAt(scene.position);
-          renderer.render(scene, camera);
-        }
-        window.requestAnimationFrame(animate, renderer.domElement);
-		
-		if(!down)
-		{
-			moveCamera();
-		}else{
-			//theta = 0;
-		}
-      };
-	  
-	  
-	  
-      animate(new Date().getTime());
-      onmessage = function(ev) {
-        paused = (ev.data == 'pause');
-      };
-
-	
-	function render()
-	{
-
-		userOpts.theta += 0.5;
-		//camera.position.x = radius * Math.sin( userOpts.theta * Math.PI / 360 );
-		//camera.position.y = radius * Math.sin( userOpts.theta * Math.PI / 360 );
-		camera.position.z = radius * Math.cos( userOpts.theta * Math.PI / 360 );
-		camera.lookAt( scene.position );
-		renderer.render( scene, camera );
+		//console.log(u, v);
+		//var width = Math.abs(u.x - v.x);
+		//var height = Math.abs(u.y - v.y);
+		//plane.position.x = (width/2) * horizontalAlign;
+		//plane.position.y = (height/2) * verticalAlign;
+		obj.add(plane);
+		return obj;
 	}
 	
 	function pad(number, length) {   
@@ -480,7 +440,7 @@ THREE.Mesh.prototype.grow = function()
 		}	   
 		return str;
 	}
-
+	
 	// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values  
 	function getParameterByName(name)
 	{
@@ -493,25 +453,6 @@ THREE.Mesh.prototype.grow = function()
 	  else
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 	}
-
-	function moveCamera()
-	{
-		userOpts.theta.x += .5;
-		userOpts.theta.y += .5;
-		userOpts.theta.z += .5;
-		adjustCamForUser(userOpts.theta);
-		camera.lookAt( scene.position );
-		renderer.render( scene, camera );
-	}
-
-	function adjustCamForUser(obj)
-	{
-		camera.position.x = radius * Math.sin( obj.x * Math.PI / 360 );
-		camera.position.y = radius * Math.sin( obj.y * Math.PI / 360 );
-		camera.position.z = radius * Math.cos( obj.z * Math.PI / 360 );
-
-	}
-
       // -->
     </script>
   </body>
